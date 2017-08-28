@@ -117,13 +117,13 @@ type metricsSummary struct {
 // of metrics we'll be reporting, so that we can pre-allocate
 // a slice of the correct length instead of constantly appending
 // for performance
-func (s *Server) tallyMetrics(percentiles []float64) ([]WorkerMetrics, metricsSummary) {
+func (s *Server) tallyMetrics(percentiles []float64) ([]*WorkerMetrics, *metricsSummary) {
 	// allocating this long array to count up the sizes is cheaper than appending
 	// the []WorkerMetrics together one at a time
-	tempMetrics := make([]WorkerMetrics, 0, len(s.Workers))
+	tempMetrics := make([]*WorkerMetrics, 0, len(s.Workers))
 
 	gatherStart := time.Now()
-	ms := metricsSummary{}
+	ms := &metricsSummary{}
 
 	for i, w := range s.Workers {
 		log.WithField("worker", i).Debug("Flushing")
@@ -168,7 +168,7 @@ func (s *Server) tallyMetrics(percentiles []float64) ([]WorkerMetrics, metricsSu
 // generateInterMetrics calls the Flush method on each
 // counter/gauge/histogram/timer/set in order to
 // generate an InterMetric corresponding to that value
-func (s *Server) generateInterMetrics(ctx context.Context, percentiles []float64, tempMetrics []WorkerMetrics, ms metricsSummary) []samplers.InterMetric {
+func (s *Server) generateInterMetrics(ctx context.Context, percentiles []float64, tempMetrics []*WorkerMetrics, ms *metricsSummary) []samplers.InterMetric {
 
 	span, _ := trace.StartSpanFromContext(ctx, "")
 	defer span.Finish()
@@ -234,7 +234,7 @@ func (s *Server) generateInterMetrics(ctx context.Context, percentiles []float64
 // because those are only performed by the global veneur instance.
 // It also does not report the total metrics posted, because on the local veneur,
 // that should happen *after* the flush-forward operation.
-func (s *Server) reportMetricsFlushCounts(ms metricsSummary) {
+func (s *Server) reportMetricsFlushCounts(ms *metricsSummary) {
 	s.Statsd.Count("worker.metrics_flushed_total", int64(ms.totalCounters), []string{"metric_type:counter"}, 1.0)
 	s.Statsd.Count("worker.metrics_flushed_total", int64(ms.totalGauges), []string{"metric_type:gauge"}, 1.0)
 	s.Statsd.Count("worker.metrics_flushed_total", int64(ms.totalLocalHistograms), []string{"metric_type:local_histogram"}, 1.0)
@@ -246,7 +246,7 @@ func (s *Server) reportMetricsFlushCounts(ms metricsSummary) {
 // globalCounters, totalHistograms, totalSets, and totalTimers,
 // which are the three metrics reported *only* by the global
 // veneur instance.
-func (s *Server) reportGlobalMetricsFlushCounts(ms metricsSummary) {
+func (s *Server) reportGlobalMetricsFlushCounts(ms *metricsSummary) {
 	// we only report these lengths in FlushGlobal
 	// since if we're the global veneur instance responsible for flushing them
 	// this avoids double-counting problems where a local veneur reports
@@ -258,7 +258,7 @@ func (s *Server) reportGlobalMetricsFlushCounts(ms metricsSummary) {
 	s.Statsd.Count("worker.metrics_flushed_total", int64(ms.totalTimers), []string{"metric_type:timer"}, 1.0)
 }
 
-func (s *Server) flushForward(ctx context.Context, wms []WorkerMetrics) {
+func (s *Server) flushForward(ctx context.Context, wms []*WorkerMetrics) {
 	span, _ := trace.StartSpanFromContext(ctx, "")
 	defer span.Finish()
 	jmLength := 0
