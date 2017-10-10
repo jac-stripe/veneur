@@ -4,50 +4,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	"net/url"
 	"os"
 	"sync"
 
 	"github.com/Sirupsen/logrus"
 	flock "github.com/theckman/go-flock"
 )
-
-// ResolveAddr takes a URL-style listen address specification,
-// resolves it and returns a net.Addr that corresponds to the
-// string. If any error (in URL decoding, destructuring or resolving)
-// occurs, ResolveAddr returns the respective error.
-//
-// Valid address examples are:
-//   udp6://127.0.0.1:8000
-//   unix:///tmp/foo.sock
-//   tcp://127.0.0.1:9002
-func ResolveAddr(str string) (net.Addr, error) {
-	u, err := url.Parse(str)
-	if err != nil {
-		return nil, err
-	}
-	switch u.Scheme {
-	case "unix", "unixgram", "unixpacket":
-		addr, err := net.ResolveUnixAddr(u.Scheme, u.Path)
-		if err != nil {
-			return nil, err
-		}
-		return addr, nil
-	case "tcp6", "tcp4", "tcp":
-		addr, err := net.ResolveTCPAddr(u.Scheme, u.Host)
-		if err != nil {
-			return nil, err
-		}
-		return addr, nil
-	case "udp6", "udp4", "udp":
-		addr, err := net.ResolveUDPAddr(u.Scheme, u.Host)
-		if err != nil {
-			return nil, err
-		}
-		return addr, nil
-	}
-	return nil, fmt.Errorf("unknown address family %q on address %q", u.Scheme, u.String())
-}
 
 // StartStatsd spawns a goroutine that listens for metrics in statsd
 // format on the address a. As this is a setup routine, if any error
@@ -187,24 +149,32 @@ func startSSFUnix(s *Server, addr *net.UnixAddr) <-chan struct{} {
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't listen on UNIX socket %v: %v", addr, err))
 	}
+
+	// Make the socket connectable by everyone with access to the socket pathname:
+	err = os.Chmod(addr.String(), 0666)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't set permissions on %v: %v", addr, err))
+	}
+
 	go func() {
 		conns := make(chan net.Conn)
 		go func() {
 			defer lock.Unlock()
 			defer close(done)
-
-			conn, err := listener.AcceptUnix()
-			if err != nil {
-				select {
-				case <-s.shutdown:
-					// occurs when cleanly shutting down the server e.g. in tests; ignore errors
-					log.WithError(err).Info("Ignoring Accept error while shutting down")
-					return
-				default:
-					log.WithError(err).Fatal("Unix accept failed")
+			for {
+				conn, err := listener.AcceptUnix()
+				if err != nil {
+					select {
+					case <-s.shutdown:
+						// occurs when cleanly shutting down the server e.g. in tests; ignore errors
+						log.WithError(err).Info("Ignoring Accept error while shutting down")
+						return
+					default:
+						log.WithError(err).Fatal("Unix accept failed")
+					}
 				}
+				conns <- conn
 			}
-			conns <- conn
 		}()
 		for {
 			select {
