@@ -278,6 +278,7 @@ func NewFromConfig(conf Config) (ret Server, err error) {
 			return ret, err
 		}
 		ret.metricSinks = append(ret.metricSinks, ddSink)
+		conf.DatadogAPIKey = REDACTED
 	}
 
 	if conf.SignalfxAPIKey != "" {
@@ -286,6 +287,7 @@ func NewFromConfig(conf Config) (ret Server, err error) {
 			return ret, err
 		}
 		ret.metricSinks = append(ret.metricSinks, sfxSink)
+		conf.SignalfxAPIKey = REDACTED
 	}
 
 	// Configure tracing sinks
