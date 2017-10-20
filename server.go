@@ -438,7 +438,7 @@ func (s *Server) Start() {
 
 		// We want to align our ticker to a multiple of it's duration for
 		// convenience of bucketing.
-		<-time.After(s.CalculateTickDelay(time.Now()))
+		<-time.After(CalculateTickDelay(s.interval, time.Now()))
 
 		// We aligned the ticker to our interval above. It's worth noting that just
 		// because we aligned once we're not gauranteed to be perfect on each
@@ -835,12 +835,6 @@ func (s *Server) Shutdown() {
 	graceful.Shutdown()
 }
 
-// CalculateTickDelay takes the provided time, `Truncate`s it a rounded-down
-// multiple of `interval`, then adds `interval` back to find the "next" tick.
-func (s *Server) CalculateTickDelay(t time.Time) time.Duration {
-	return t.Truncate(s.interval).Add(s.interval).Sub(t)
-}
-
 // IsLocal indicates whether veneur is running as a local instance
 // (forwarding non-local data to a global veneur instance) or is running as a global
 // instance (sending all data directly to the final destination).
@@ -869,4 +863,10 @@ func (s *Server) getPlugins() []plugins.Plugin {
 func (s *Server) TracingEnabled() bool {
 	//TODO we now need to check that the backends are flushing the data too
 	return s.SpanWorker != nil
+}
+
+// CalculateTickDelay takes the provided time, `Truncate`s it a rounded-down
+// multiple of `interval`, then adds `interval` back to find the "next" tick.
+func CalculateTickDelay(interval time.Duration, t time.Time) time.Duration {
+	return t.Truncate(interval).Add(interval).Sub(t)
 }
