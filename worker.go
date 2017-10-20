@@ -28,7 +28,7 @@ type Worker struct {
 	mutex      *sync.Mutex
 	stats      *statsd.Client
 	logger     *logrus.Logger
-	wm         *WorkerMetrics
+	wm         WorkerMetrics
 }
 
 // WorkerMetrics is just a plain struct bundling together the flushed contents of a worker
@@ -52,8 +52,8 @@ type WorkerMetrics struct {
 }
 
 // NewWorkerMetrics initializes a WorkerMetrics struct
-func NewWorkerMetrics() *WorkerMetrics {
-	return &WorkerMetrics{
+func NewWorkerMetrics() WorkerMetrics {
+	return WorkerMetrics{
 		counters:        make(map[samplers.MetricKey]*samplers.Counter),
 		globalCounters:  make(map[samplers.MetricKey]*samplers.Counter),
 		gauges:          make(map[samplers.MetricKey]*samplers.Gauge),
@@ -69,7 +69,7 @@ func NewWorkerMetrics() *WorkerMetrics {
 // Upsert creates an entry on the WorkerMetrics struct for the given metrickey (if one does not already exist)
 // and updates the existing entry (if one already exists).
 // Returns true if the metric entry was created and false otherwise.
-func (wm *WorkerMetrics) Upsert(mk samplers.MetricKey, Scope samplers.MetricScope, tags []string) bool {
+func (wm WorkerMetrics) Upsert(mk samplers.MetricKey, Scope samplers.MetricScope, tags []string) bool {
 	present := false
 	switch mk.Type {
 	case counterTypeName:
@@ -246,7 +246,7 @@ func (w *Worker) ImportMetric(other samplers.JSONMetric) {
 }
 
 // Flush resets the worker's internal metrics and returns their contents.
-func (w *Worker) Flush() *WorkerMetrics {
+func (w *Worker) Flush() WorkerMetrics {
 	start := time.Now()
 	// This is a critical spot. The worker can't process metrics while this
 	// mutex is held! So we try and minimize it by copying the maps of values
