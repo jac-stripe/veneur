@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"net"
 	"net/http"
 	"strings"
@@ -25,6 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/getsentry/raven-go"
 	"github.com/sirupsen/logrus"
+	"github.com/viki-org/dnscache"
 	"github.com/zenazn/goji/bind"
 	"github.com/zenazn/goji/graceful"
 
@@ -64,6 +66,8 @@ const defaultSpanBufferSize = 1 << 14
 
 const lightstepDefaultPort = 8080
 const lightstepDefaultInterval = 5 * time.Minute
+
+var dnsCache = dnscache.New((time.Second * 10 * 2) + time.Duration(rand.Int31n(10))*time.Second)
 
 // A Server is the actual veneur instance that will be run.
 type Server struct {
