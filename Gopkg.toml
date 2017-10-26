@@ -95,7 +95,3 @@
 [[constraint]]
   branch = "master"
   name = "github.com/theckman/go-flock"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/viki-org/dnscache"

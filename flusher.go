@@ -364,18 +364,18 @@ func resolveEndpoint(endpoint string) (string, error) {
 		return endpoint, err
 	}
 
-	resolvedName, err := dnsCache.FetchOneString(origHost)
+	resolvedNames, err := net.LookupHost(origHost)
 	if err != nil {
 		return endpoint, err
 	}
-	if resolvedName == "" {
+	if len(resolvedNames) == 0 {
 		return endpoint, &net.DNSError{
 			Err:  "no hosts found",
 			Name: origHost,
 		}
 	}
 
-	origURL.Host = net.JoinHostPort(resolvedName, origPort)
+	origURL.Host = net.JoinHostPort(resolvedNames[0], origPort)
 	return origURL.String(), nil
 }
 

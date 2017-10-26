@@ -169,12 +169,6 @@
   revision = "6de226b0d5f040ed85b88c82c381709b98277f3d"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/viki-org/dnscache"
-  packages = ["."]
-  revision = "c70c1f23c5d84ab39054ec6b418a5ed0fa51cade"
-
-[[projects]]
   name = "github.com/zenazn/goji"
   packages = ["bind","graceful","graceful/listener"]
   revision = "64eb34159fe53473206c2b3e70fe396a639452f2"
@@ -237,6 +231,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ac168dd7343dce9e5a56bc4650b05607860324be6d06d470e3c74d555e256bc8"
+  inputs-digest = "32a3b523a2ded372923ed3dfba870de90e99f5dacf7b5d6f3459bad31ddca667"
   solver-name = "gps-cdcl"
   solver-version = 1
