@@ -222,6 +222,10 @@ func (w *Worker) ImportMetric(other samplers.JSONMetric) {
 		if err := w.wm.globalCounters[other.MetricKey].Combine(other.Value); err != nil {
 			log.WithError(err).Error("Could not merge counters")
 		}
+	case "gauge":
+		if err := w.wm.gauges[other.MetricKey].Combine(other.Value); err != nil {
+			log.WithError(err).Error("Could not merge gauges")
+		}
 	case "set":
 		if err := w.wm.sets[other.MetricKey].Combine(other.Value); err != nil {
 			log.WithError(err).Error("Could not merge sets")
