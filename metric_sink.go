@@ -252,7 +252,11 @@ func (sfx *signalFXSink) Flush(ctx context.Context, interMetrics []samplers.Inte
 		dims := map[string]string{}
 		for _, tag := range metric.Tags {
 			kv := strings.Split(tag, ":")
-			dims[kv[0]] = kv[1]
+			if len(kv) == 1 {
+				dims[kv[0]] = ""
+			} else {
+				dims[kv[0]] = kv[1]
+			}
 		}
 		if metric.Type == samplers.GaugeMetric {
 			points = append(points, sfxclient.GaugeF(metric.Name, dims, metric.Value))
