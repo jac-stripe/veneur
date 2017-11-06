@@ -104,7 +104,8 @@ type Server struct {
 	plugins   []plugins.Plugin
 	pluginMtx sync.Mutex
 
-	enableProfiling bool
+	enableProfiling  bool
+	endpointResolver *EndpointResolver
 
 	HistogramAggregates samplers.HistogramAggregates
 
@@ -128,6 +129,8 @@ func NewFromConfig(conf Config) (ret Server, err error) {
 			mappedTags[splt[0]] = splt[1]
 		}
 	}
+
+	ret.endpointResolver = NewEndpointResolver(conf.ResolutionCacheProbability)
 
 	ret.TagsAsMap = mappedTags
 	ret.traceLightstepAccessToken = conf.TraceLightstepAccessToken

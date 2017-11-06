@@ -332,7 +332,7 @@ func (s *Server) flushForward(ctx context.Context, wms []WorkerMetrics) {
 
 	// always re-resolve the host to avoid dns caching
 	dnsStart := time.Now()
-	endpoint, err := resolveEndpoint(fmt.Sprintf("%s/import", s.ForwardAddr))
+	endpoint, err := s.endpointResolver.ResolveEndpoint(fmt.Sprintf("%s/import", s.ForwardAddr))
 	if err != nil {
 		// not a fatal error if we fail
 		// we'll just try to use the host as it was given to us

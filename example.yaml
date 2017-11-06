@@ -92,6 +92,16 @@ aggregates:
  - "max"
  - "count"
 
+# Veneur aligns it's ticks with a value evenly divisible by the flush period.
+# For example, a 10s interval will flush as close to 0, 10, 20… seconds past
+# the minute. In some deployments this can cause DNS "storms" where every
+# instance of Veneur attempts to resolve a hostname and about the same time.
+# This probability (0.0 to 1.0) is used with a random number to determine if
+# this instance of veneur should use a cached value at flush time. This
+# probabilistic must be balanced with DNS freshness, as low probabilities might
+# cache "bad" resolved IPs to stick around a long time. This defaults to 1.0
+# but we use .5 in production.
+resolution_cache_probability: 1.0
 
 
 # == PERFORMANCE ==
