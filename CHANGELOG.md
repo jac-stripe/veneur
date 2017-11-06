@@ -1,8 +1,12 @@
 # 1.8.0, pending
 
+## Added
+* New 'blackhole' sink for testing and benchmark purposes. Thanks [gphat](https://github.com/gphat)!
+
 ## Improvements
 * Veneur no longer **requires** the use of Datadog as a target for flushes. Veneur can now use one or more of any of it's supported sinks as a backend. This realizes our desire for Veneur to be fully vendor agnostic. Thanks [gphat](https://github.com/gphat)!
 * The package `github.com/stripe/veneur/trace` now depends on fewer other packages across veneur, making it easier to pull in `trace` as a dependency. Thanks [antifuchs](https://github.com/antifuchs)!
+* Cleaned up some linter warnings. Thanks [gphat](https://github.com/gphat)!
 
 ## Bugfixes
 * Fix a panic when using `veneur-emit` to emit metrics via `-ssf` when no tags are specified. Thanks [myndzi](https://github.com/myndzi)
@@ -25,7 +29,6 @@
 * The BUILD_DATE and VERSION variables can be set at link-time and are now exposed by the `/builddate` and `/version` endpoints.
 
 ## Improvements
-
 * [A new HyperLogLog implementation](https://github.com/stripe/veneur/pull/190) means `set`s are faster and allocate less memory. Thanks, [martinpinto](https://github.com/martinpinto) and [seiflotfy](https://github.com/seiflotfy)!
 * Introduced a new `metricSink` which provides a common interface for metric backends. In an upcoming release all plugins will be converted to this interface. Thanks [gphat](https://github.com/gphat)!
 
