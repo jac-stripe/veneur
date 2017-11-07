@@ -1030,6 +1030,6 @@ func BenchmarkServerFlush(b *testing.B) {
 			})
 		}
 
-		f.server.Flush()
+		f.server.Flush(context.Background())
 	}
 }
