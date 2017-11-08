@@ -7,6 +7,7 @@
 * Veneur no longer **requires** the use of Datadog as a target for flushes. Veneur can now use one or more of any of it's supported sinks as a backend. This realizes our desire for Veneur to be fully vendor agnostic. Thanks [gphat](https://github.com/gphat)!
 * The package `github.com/stripe/veneur/trace` now depends on fewer other packages across veneur, making it easier to pull in `trace` as a dependency. Thanks [antifuchs](https://github.com/antifuchs)!
 * Cleaned up some linter warnings. Thanks [gphat](https://github.com/gphat)!
+* Tests no longer depend on implicit presence of a Datadog metric or span sink. Thanks [gphat](https://github.com/gphat)!
 
 ## Bugfixes
 * Fix a panic when using `veneur-emit` to emit metrics via `-ssf` when no tags are specified. Thanks [myndzi](https://github.com/myndzi)
