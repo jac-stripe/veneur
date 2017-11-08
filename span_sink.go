@@ -372,3 +372,22 @@ func (ls *lightStepSpanSink) Flush() {
 	ls.serviceCount = make(map[string]int64)
 	log.WithField("total_spans", totalCount).Debug("Checkpointing flushed spans for Lightstep")
 }
+
+type blackholeSpanSink struct {
+}
+
+func NewBlackholeSpanSink() (*blackholeSpanSink, error) {
+	return &blackholeSpanSink{}, nil
+}
+
+func (b *blackholeSpanSink) Name() string {
+	return "blackhole"
+}
+
+func (b *blackholeSpanSink) Ingest(ssf.SSFSpan) error {
+	return nil
+}
+
+func (b *blackholeSpanSink) Flush() {
+	return
+}
