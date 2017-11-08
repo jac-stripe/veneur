@@ -21,6 +21,12 @@ const (
 	CounterMetric MetricType = iota
 	// GaugeMetric is a gauge
 	GaugeMetric
+	// HistogramMetric is a histogram
+	HistogramMetric
+	// SetMetric is a set
+	SetMetric
+	// TimerMetric is a timer
+	TimerMetric
 )
 
 // InterMetric represents a metric that has been completed and is ready for
@@ -117,7 +123,7 @@ func (c *Counter) Export() (JSONMetric, error) {
 	return JSONMetric{
 		MetricKey: MetricKey{
 			Name:       c.Name,
-			Type:       "counter",
+			Type:       CounterMetric,
 			JoinedTags: strings.Join(c.Tags, ","),
 		},
 		Tags:  c.Tags,
@@ -222,7 +228,7 @@ func (s *Set) Export() (JSONMetric, error) {
 	return JSONMetric{
 		MetricKey: MetricKey{
 			Name:       s.Name,
-			Type:       "set",
+			Type:       SetMetric,
 			JoinedTags: strings.Join(s.Tags, ","),
 		},
 		Tags:  s.Tags,
@@ -418,7 +424,7 @@ func (h *Histo) Export() (JSONMetric, error) {
 	return JSONMetric{
 		MetricKey: MetricKey{
 			Name:       h.Name,
-			Type:       "histogram",
+			Type:       HistogramMetric,
 			JoinedTags: strings.Join(h.Tags, ","),
 		},
 		Tags:  h.Tags,

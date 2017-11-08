@@ -38,16 +38,16 @@ const (
 
 // MetricKey is a struct used to key the metrics into the worker's map. All fields must be comparable types.
 type MetricKey struct {
-	Name       string `json:"name"`
-	Type       string `json:"type"`
-	JoinedTags string `json:"tagstring"` // tags in deterministic order, joined with commas
+	Name       string     `json:"name"`
+	Type       MetricType `json:"type"`
+	JoinedTags string     `json:"tagstring"` // tags in deterministic order, joined with commas
 }
 
 // ToString returns a string representation of this MetricKey
 func (m *MetricKey) String() string {
 	var buff bytes.Buffer
 	buff.WriteString(m.Name)
-	buff.WriteString(m.Type)
+	buff.WriteString(m.Type.String())
 	buff.WriteString(m.JoinedTags)
 	return buff.String()
 }
@@ -113,17 +113,17 @@ func ParseMetricSSF(metric *ssf.SSFSample) (UDPMetric, error) {
 	ret.Name = metric.Name
 	switch metric.Metric {
 	case ssf.SSFSample_COUNTER:
-		ret.Type = "counter"
+		ret.Type = CounterMetric
 	case ssf.SSFSample_GAUGE:
-		ret.Type = "gauge"
+		ret.Type = GaugeMetric
 	case ssf.SSFSample_HISTOGRAM:
-		ret.Type = "histogram"
+		ret.Type = HistogramMetric
 	case ssf.SSFSample_SET:
-		ret.Type = "set"
+		ret.Type = SetMetric
 	default:
 		return UDPMetric{}, invalidMetricTypeError
 	}
-	h.Write([]byte(ret.Type))
+	h.Write([]byte(ret.Type.String()))
 	if metric.Metric == ssf.SSFSample_SET {
 		ret.Value = metric.Message
 	} else {
@@ -188,23 +188,23 @@ func ParseMetric(packet []byte) (*UDPMetric, error) {
 	// Decide on a type
 	switch typeChunk[0] {
 	case 'c':
-		ret.Type = "counter"
+		ret.Type = CounterMetric
 	case 'g':
-		ret.Type = "gauge"
+		ret.Type = GaugeMetric
 	case 'h':
-		ret.Type = "histogram"
+		ret.Type = HistogramMetric
 	case 'm': // We can ignore the s in "ms"
-		ret.Type = "timer"
+		ret.Type = TimerMetric
 	case 's':
-		ret.Type = "set"
+		ret.Type = SetMetric
 	default:
 		return nil, invalidMetricTypeError
 	}
 	// Add the type to the digest
-	h.Write([]byte(ret.Type))
+	h.Write([]byte(ret.Type.String()))
 
 	// Now convert the metric's value
-	if ret.Type == "set" {
+	if ret.Type == SetMetric {
 		ret.Value = string(valueChunk)
 	} else {
 		v, err := strconv.ParseFloat(string(valueChunk), 64)

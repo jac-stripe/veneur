@@ -11,12 +11,6 @@ import (
 	"github.com/stripe/veneur/ssf"
 )
 
-const counterTypeName = "counter"
-const gaugeTypeName = "gauge"
-const histogramTypeName = "histogram"
-const setTypeName = "set"
-const timerTypeName = "timer"
-
 // Worker is the doodad that does work.
 type Worker struct {
 	id         int
@@ -72,7 +66,7 @@ func NewWorkerMetrics() WorkerMetrics {
 func (wm WorkerMetrics) Upsert(mk samplers.MetricKey, Scope samplers.MetricScope, tags []string) bool {
 	present := false
 	switch mk.Type {
-	case counterTypeName:
+	case samplers.CounterMetric:
 		if Scope == samplers.GlobalOnly {
 			if _, present = wm.globalCounters[mk]; !present {
 				wm.globalCounters[mk] = samplers.NewCounter(mk.Name, tags)
@@ -82,11 +76,11 @@ func (wm WorkerMetrics) Upsert(mk samplers.MetricKey, Scope samplers.MetricScope
 				wm.counters[mk] = samplers.NewCounter(mk.Name, tags)
 			}
 		}
-	case gaugeTypeName:
+	case samplers.GaugeMetric:
 		if _, present = wm.gauges[mk]; !present {
 			wm.gauges[mk] = samplers.NewGauge(mk.Name, tags)
 		}
-	case histogramTypeName:
+	case samplers.HistogramMetric:
 		if Scope == samplers.LocalOnly {
 			if _, present = wm.localHistograms[mk]; !present {
 				wm.localHistograms[mk] = samplers.NewHist(mk.Name, tags)
@@ -96,7 +90,7 @@ func (wm WorkerMetrics) Upsert(mk samplers.MetricKey, Scope samplers.MetricScope
 				wm.histograms[mk] = samplers.NewHist(mk.Name, tags)
 			}
 		}
-	case setTypeName:
+	case samplers.SetMetric:
 		if Scope == samplers.LocalOnly {
 			if _, present = wm.localSets[mk]; !present {
 				wm.localSets[mk] = samplers.NewSet(mk.Name, tags)
@@ -106,7 +100,7 @@ func (wm WorkerMetrics) Upsert(mk samplers.MetricKey, Scope samplers.MetricScope
 				wm.sets[mk] = samplers.NewSet(mk.Name, tags)
 			}
 		}
-	case timerTypeName:
+	case samplers.TimerMetric:
 		if Scope == samplers.LocalOnly {
 			if _, present = wm.localTimers[mk]; !present {
 				wm.localTimers[mk] = samplers.NewHist(mk.Name, tags)
